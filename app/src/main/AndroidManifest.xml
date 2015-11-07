@@ -18,6 +18,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="com.google.android.nearby.messages.API_KEY"
+            android:value="AIzaSyDvigx68-2xJI57KShXP98Y2GQINb8FZ5k" />
     </application>
 
 </manifest>
