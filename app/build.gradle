@@ -1,0 +1,27 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion deps.compileSdk
+    buildToolsVersion deps.buildTools
+
+    defaultConfig {
+        applicationId "com.staticelements.plenum"
+        minSdkVersion deps.minSdk
+        targetSdkVersion deps.targetSdk
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    testCompile "junit:junit:${deps.junit}"
+    compile "com.android.support:appcompat-v7:${deps.supportLib}"
+    compile "com.android.support:design:${deps.supportLib}"
+}
