@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'android'
 
 android {
     compileSdkVersion deps.compileSdk
@@ -10,7 +9,7 @@ android {
         minSdkVersion deps.minSdk
         targetSdkVersion deps.targetSdk
         versionCode 1
-        versionName "1.0"
+        versionName "0.1"
     }
     buildTypes {
         release {
@@ -26,4 +25,6 @@ dependencies {
     compile "com.android.support:appcompat-v7:${deps.supportLib}"
     compile "com.android.support:design:${deps.supportLib}"
     compile "com.google.android.gms:play-services-nearby:${deps.nearbyPlugin}"
+    compile "com.jakewharton:butterknife:${deps.butterKnife}"
+    compile 'com.google.android.gms:play-services-appindexing:8.3.0'
 }
