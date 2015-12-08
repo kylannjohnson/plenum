@@ -10,26 +10,31 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.staticelements.plenum.MainActivity"
+    tools:context=".PlenumActivity"
     tools:showIn="@layout/activity_main">
 
     <TextView
         android:id="@+id/current_status"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/none"/>
+        tools:text="@string/starting"/>
 
     <Button
         android:id="@+id/start_event"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="false"
         android:text="@string/start_event"/>
 
     <Button
         android:id="@+id/join_event"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:enabled="false"
         android:text="@string/join_event"/>
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:listitem="@android:layout/simple_list_item_1"/>
 </LinearLayout>

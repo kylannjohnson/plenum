@@ -21,10 +21,14 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    testCompile "junit:junit:${deps.junit}"
     compile "com.android.support:appcompat-v7:${deps.supportLib}"
     compile "com.android.support:design:${deps.supportLib}"
     compile "com.google.android.gms:play-services-nearby:${deps.nearbyPlugin}"
     compile "com.jakewharton:butterknife:${deps.butterKnife}"
+    testCompile "org.mockito:mockito-all:${deps.mockitoVersion}"
+    testCompile "org.hamcrest:hamcrest-all:${deps.hamcrestVersion}"
+    testCompile "org.powermock:powermock-module-junit4:${deps.powerMockito}"
+    testCompile "org.powermock:powermock-api-mockito:${deps.powerMockito}"
+    androidTestCompile "junit:junit:${deps.junit}"
     compile 'com.google.android.gms:play-services-appindexing:8.3.0'
 }

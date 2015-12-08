@@ -6,12 +6,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -23,15 +20,23 @@ import com.google.android.gms.common.api.Status;
 import com.google.android.gms.nearby.Nearby;
 import com.google.android.gms.nearby.messages.Message;
 import com.google.android.gms.nearby.messages.MessageListener;
+import com.staticelements.plenum.nearby.NearbySources;
+import com.staticelements.plenum.presenter.PlenumConnection;
+import com.staticelements.plenum.presenter.PlenumConnectionPresenter;
+import com.staticelements.plenum.view.ActiveMeetingView;
+
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class PlenumActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        ActiveMeetingView {
 
     private static final int REQUEST_RESOLVE_ERROR = 0x01;
-    private static final String TAG = MainActivity.class.getSimpleName();
+    private static final String TAG = PlenumActivity.class.getSimpleName();
 
     private GoogleApiClient googleApi;
     private boolean resolvingError;
@@ -40,39 +45,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     TextView statusTextView;
 
     @Bind(R.id.join_event)
-    Button joinButton;
+    Button joinEvent;
+
+    @Bind(R.id.start_event)
+    Button startEvent;
 
     private static final Message connectedMessage = new Message("Connected".getBytes());
-    private static final Message disconnectedMessage = new Message("Connected".getBytes());
+    private static final Message disconnectedMessage = new Message("Disconnected".getBytes());
 
     private Handler handler;
 
-    private MessageListener messageListener = new MessageListener() {
+    private PlenumConnection plenumConnection;
+
+    private final MessageListener messageListener = new MessageListener() {
         @Override
         public void onLost(Message msg) {
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    statusTextView.setText(new String(disconnectedMessage.getContent()));
-                }
-            };
-
-            handler.post(r);
+            plenumConnection.nearbyConnectionLost();
         }
 
         @Override
         public void onFound(final Message msg) {
-
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    statusTextView.setText(new
-                            String(msg.getContent()
-                    ));
-                }
-            };
-
-            handler.post(r);
+            plenumConnection.nearbyConnectionMade();
         }
     };
 
@@ -84,18 +77,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ButterKnife.bind(this);
 
         handler = new Handler(getMainLooper());
+        plenumConnection = new PlenumConnectionPresenter(this, new NearbySources());
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -118,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onStop() {
         if (googleApi.isConnected()) {
             // Clean up when the user leaves the activity.
-            Nearby.Messages.unpublish(googleApi, connectedMessage)
+            Nearby.Messages.unpublish(googleApi, disconnectedMessage)
                     .setResultCallback(new ErrorCheckingCallback("unpublish()"));
             Nearby.Messages.unsubscribe(googleApi, messageListener)
                     .setResultCallback(new ErrorCheckingCallback("unsubscribe()"));
@@ -135,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 new ErrorCheckingCallback("getPermissionStatus", new Runnable() {
                     @Override
                     public void run() {
-                        publishAndSubscribe();
+                        plenumConnection.readyForConnection();
                     }
                 })
         );
@@ -160,7 +145,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             if (resultCode == RESULT_OK) {
                 // Permission granted or error resolved successfully then we proceed
                 // with publish and subscribe..
-                publishAndSubscribe();
+                plenumConnection.readyForConnection();
             } else {
                 // This may mean that user had rejected to grant nearby permission.
                 Log.i(TAG, "Failed to resolve error with code " + resultCode);
@@ -168,18 +153,56 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
 
-    private void publishAndSubscribe() {
-        // We automatically subscribe to messages from nearby devices once
-        // GoogleApiClient is connected. If we arrive here more than once during
-        // an activity's lifetime, we may end up with multiple calls to
-        // subscribe(). Repeated subscriptions using the same MessageListener
-        // are ignored.
-        Nearby.Messages.publish(googleApi, connectedMessage)
-                .setResultCallback(new ErrorCheckingCallback("publish()"));
+    @OnClick(R.id.join_event)
+    public void joinEvent() {
         Nearby.Messages.subscribe(googleApi, messageListener)
                 .setResultCallback(new ErrorCheckingCallback("subscribe()"));
     }
 
+    @OnClick(R.id.start_event)
+    public void startEvent() {
+        Nearby.Messages.publish(googleApi, connectedMessage)
+                .setResultCallback(new ErrorCheckingCallback("publish()"));
+    }
+
+    @Override
+    public void showStatus(final String statusMessage) {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                statusTextView.setText(statusMessage);
+            }
+        };
+
+        handler.post(r);
+    }
+
+    @Override
+    public void showActiveConnections(List<String> connections) {
+
+    }
+
+    @Override
+    public void enable() {
+        joinEvent.setEnabled(true);
+        startEvent.setEnabled(true);
+    }
+
+    @Override
+    public void disable() {
+        joinEvent.setEnabled(false);
+        startEvent.setEnabled(false);
+    }
+
+    @Override
+    public void showConnectedScreen() {
+
+    }
+
+    @Override
+    public void showMainScreen() {
+
+    }
 
     /**
      * A simple ResultCallback that logs when errors occur.
@@ -211,7 +234,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if (status.hasResolution()) {
                     if (!resolvingError) {
                         try {
-                            status.startResolutionForResult(MainActivity.this,
+                            status.startResolutionForResult(PlenumActivity.this,
                                     REQUEST_RESOLVE_ERROR);
                             resolvingError = true;
                         } catch (IntentSender.SendIntentException e) {
