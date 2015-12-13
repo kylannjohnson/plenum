@@ -6,13 +6,11 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
@@ -27,17 +25,20 @@ import com.staticelements.plenum.view.ActiveMeetingView;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PlenumActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
+public class PlenumActivity extends PlenumBaseActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         ActiveMeetingView {
 
     private static final int REQUEST_RESOLVE_ERROR = 0x01;
     private static final String TAG = PlenumActivity.class.getSimpleName();
 
+    @Inject GoogleApiClient.Builder googleApiBuilder;
     private GoogleApiClient googleApi;
     private boolean resolvingError;
 
@@ -84,11 +85,10 @@ public class PlenumActivity extends AppCompatActivity implements GoogleApiClient
 
         // ATTENTION: This "addApi(AppIndex.API)"was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
-        googleApi = new GoogleApiClient.Builder(this)
-                .addApi(Nearby.MESSAGES_API)
+        googleApi = googleApiBuilder
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
-                .addApi(AppIndex.API).build();
+                .build();
     }
 
     @Override
