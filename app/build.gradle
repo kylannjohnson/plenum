@@ -11,6 +11,7 @@ android {
         targetSdkVersion deps.targetSdk
         versionCode 1
         versionName "0.1"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -33,5 +34,8 @@ dependencies {
     testCompile "org.powermock:powermock-module-junit4:${deps.powerMockito}"
     testCompile "org.powermock:powermock-api-mockito:${deps.powerMockito}"
     androidTestCompile "junit:junit:${deps.junit}"
-    compile 'com.google.android.gms:play-services-appindexing:8.3.0'
+    androidTestCompile "com.android.support:support-annotations:${deps.supportLib}"
+    androidTestCompile "com.android.support.test.espresso:espresso-core:${deps.espressoCore}"
+    androidTestCompile "com.android.support.test:runner:${deps.espressoRunner}"
+    compile "com.google.android.gms:play-services-appindexing:${deps.appIndexing}"
 }
